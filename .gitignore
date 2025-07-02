@@ -1,0 +1,117 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+server
+go-api-setup
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+
+# Build directories
+build/
+dist/
+bin/
+
+# Docker files (optional, uncomment if not using Docker)
+# Dockerfile
+# docker-compose.yml
+# .dockerignore
+
+# Air live reload tool
+tmp/
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Profiling data
+*.prof
+
+# Delve debugger
+__debug_bin
+
+# Local configuration files
+config.local.*
+
+# Backup files
+*.bak
+*.backup
+
+# Node modules (if using frontend tools)
+node_modules/
+
+# Compiled Object files
+*.o
+*.a
+
+# Architecture specific extensions/prefixes
+*.[568vq]
+[568vq].out
+
+# cgo generated files
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+# test generated files
+_test/
+
+# Certificate files
+*.pem
+*.key
+*.crt
+*.cert
+
+# JWT secret keys (if stored as files)
+*.secret 
