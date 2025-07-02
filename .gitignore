@@ -4,9 +4,9 @@
 *.dll
 *.so
 *.dylib
-main
-server
-go-api-setup
+/main
+/server
+/go-api-setup
 
 # Test binary, built with `go test -c`
 *.test
