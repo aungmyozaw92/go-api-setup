@@ -6,11 +6,10 @@ import (
 
 	"github.com/aungmyozaw92/go-api-setup/internal/config"
 	"github.com/aungmyozaw92/go-api-setup/internal/handler"
-	"github.com/aungmyozaw92/go-api-setup/internal/middleware"
 	"github.com/aungmyozaw92/go-api-setup/internal/repository"
+	"github.com/aungmyozaw92/go-api-setup/internal/routes"
 	"github.com/aungmyozaw92/go-api-setup/internal/usecase"
 	"github.com/aungmyozaw92/go-api-setup/pkg/database"
-	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -39,57 +38,44 @@ func main() {
 	authHandler := handler.NewAuthHandler(userUsecase)
 	userHandler := handler.NewUserHandler(userUsecase)
 
-	// Setup routes
-	router := mux.NewRouter()
+	// Setup routes using the routes package
+	router := routes.SetupRoutes(authHandler, userHandler, config.JWT.SecretKey)
 
-	// Apply CORS middleware to all routes
-	router.Use(middleware.CORSMiddleware)
+	// Log server information
+	logServerInfo(config.Server.Port)
 
-	// Public routes (no authentication required)
-	router.HandleFunc("/api/auth/register", authHandler.Register).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/auth/login", authHandler.Login).Methods("POST", "OPTIONS")
+	// Start server
+	if err := http.ListenAndServe(":"+config.Server.Port, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
+}
 
-	// Health check endpoint
-	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "healthy"}`))
-	}).Methods("GET")
-
-	// Protected routes (authentication required)
-	protected := router.PathPrefix("/api").Subrouter()
-	protected.Use(middleware.AuthMiddleware(config.JWT.SecretKey))
-
-	// User profile routes
-	protected.HandleFunc("/profile", userHandler.GetProfile).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/profile", userHandler.UpdateUser).Methods("PUT", "OPTIONS")
-
-	// User CRUD routes
-	protected.HandleFunc("/users", userHandler.CreateUser).Methods("POST", "OPTIONS")
-	protected.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/users/{id:[0-9]+}", userHandler.GetUser).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/users/{id:[0-9]+}", userHandler.UpdateUserByID).Methods("PUT", "OPTIONS")
-	protected.HandleFunc("/users/{id:[0-9]+}", userHandler.DeleteUserByID).Methods("DELETE", "OPTIONS")
-
-	log.Printf("Server starting on port %s", config.Server.Port)
-	log.Printf("Available endpoints:")
-	log.Printf("Authentication:")
-	log.Printf("  POST /api/auth/register     - Register a new user")
-	log.Printf("  POST /api/auth/login        - Login user")
-	log.Printf("User Profile (Protected):")
+// logServerInfo logs the server startup information and available endpoints
+func logServerInfo(port string) {
+	log.Printf("Server starting on port %s", port)
+	log.Printf("🚀 Go REST API Server")
+	log.Printf("📍 Available endpoints:")
+	log.Printf("")
+	log.Printf("🌐 General:")
+	log.Printf("  GET    /                    - API welcome message")
+	log.Printf("  GET    /health              - Health check")
+	log.Printf("")
+	log.Printf("🔐 Authentication (Public):")
+	log.Printf("  POST   /api/auth/register   - Register a new user")
+	log.Printf("  POST   /api/auth/login      - Login user")
+	log.Printf("")
+	log.Printf("👤 User Profile (Protected):")
 	log.Printf("  GET    /api/profile         - Get current user profile")
 	log.Printf("  PUT    /api/profile         - Update current user profile")
 	log.Printf("  DELETE /api/profile         - Delete current user account")
-	log.Printf("User Management (Protected):")
+	log.Printf("")
+	log.Printf("👥 User Management (Protected):")
 	log.Printf("  POST   /api/users           - Create a new user")
 	log.Printf("  GET    /api/users           - Get all users (with pagination)")
 	log.Printf("  GET    /api/users/{id}      - Get user by ID")
 	log.Printf("  PUT    /api/users/{id}      - Update user by ID")
 	log.Printf("  DELETE /api/users/{id}      - Delete user by ID")
-	log.Printf("Other:")
-	log.Printf("  GET    /health              - Health check")
-
-	if err := http.ListenAndServe(":"+config.Server.Port, router); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
-	}
+	log.Printf("")
+	log.Printf("📖 Documentation: https://github.com/aungmyozaw92/go-api-setup")
+	log.Printf("🎯 Ready to accept requests!")
 } 
