@@ -1,0 +1,57 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Environment files
+.env
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+bin/
+dist/
+build/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Test files
+*_test.go
+coverage.out
+coverage.html
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Air (hot reload) config
+.air.toml
+
+# Examples and scripts (optional)
+examples/
+scripts/init.sql 

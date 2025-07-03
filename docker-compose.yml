@@ -1,0 +1,63 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: go-api-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: go_api_setup
+      MYSQL_USER: api_user
+      MYSQL_PASSWORD: api_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - api_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+
+  # Go API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-api-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: api_user
+      DB_PASSWORD: api_password
+      DB_NAME: go_api_setup
+
+      # Server configuration
+      SERVER_PORT: 8080
+
+      # JWT configuration
+      JWT_SECRET: your-production-secret-key-change-this
+
+      # Application environment
+      APP_ENV: production
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - api_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  api_network:
+    driver: bridge

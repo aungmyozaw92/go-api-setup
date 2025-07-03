@@ -1,4 +1,4 @@
-.PHONY: test test-unit test-verbose test-coverage test-race clean build run
+.PHONY: test test-unit test-verbose test-coverage test-race clean build run docker-build docker-run docker-dev docker-stop docker-clean help
 
 # Default target
 all: test
@@ -52,6 +52,42 @@ run:
 	@echo "🚀 Starting server..."
 	go run ./cmd/server/main.go
 
+# Docker Commands
+docker-build:
+	@echo "🐳 Building Docker image..."
+	docker build -t go-api-setup:latest .
+
+docker-run:
+	@echo "🐳 Running with Docker Compose (Production)..."
+	docker compose up -d
+
+docker-dev:
+	@echo "🐳 Running with Docker Compose (Development)..."
+	docker compose -f docker-compose.dev.yml up
+
+docker-stop:
+	@echo "🛑 Stopping Docker containers..."
+	docker compose down
+	docker compose -f docker-compose.dev.yml down
+
+docker-clean:
+	@echo "🧹 Cleaning Docker containers and volumes..."
+	docker compose down -v
+	docker compose -f docker-compose.dev.yml down -v
+	docker system prune -f
+
+docker-logs:
+	@echo "📋 Showing Docker logs..."
+	docker compose logs -f
+
+docker-logs-api:
+	@echo "📋 Showing API container logs..."
+	docker compose logs -f api
+
+docker-shell:
+	@echo "🐚 Opening shell in API container..."
+	docker compose exec api sh
+
 # Clean build artifacts and test files
 clean:
 	@echo "🧹 Cleaning up..."
@@ -103,6 +139,8 @@ dev-setup: deps
 # Display help
 help:
 	@echo "Available commands:"
+	@echo ""
+	@echo "📋 Testing:"
 	@echo "  test           - Run all tests"
 	@echo "  test-verbose   - Run tests with verbose output"
 	@echo "  test-coverage  - Run tests with coverage report"
@@ -111,14 +149,32 @@ help:
 	@echo "  test-usecase   - Test usecase package only"
 	@echo "  test-handler   - Test handler package only"
 	@echo "  test-middleware- Test middleware package only"
+	@echo ""
+	@echo "🔨 Building & Running:"
 	@echo "  build          - Build the application"
-	@echo "  run            - Run the application"
-	@echo "  clean          - Clean build artifacts"
+	@echo "  run            - Run the application locally"
+	@echo ""
+	@echo "🐳 Docker Commands:"
+	@echo "  docker-build   - Build Docker image"
+	@echo "  docker-run     - Run with Docker Compose (Production)"
+	@echo "  docker-dev     - Run with Docker Compose (Development)"
+	@echo "  docker-stop    - Stop Docker containers"
+	@echo "  docker-clean   - Clean Docker containers and volumes"
+	@echo "  docker-logs    - Show all container logs"
+	@echo "  docker-logs-api- Show API container logs only"
+	@echo "  docker-shell   - Open shell in API container"
+	@echo ""
+	@echo "🛠️ Development:"
 	@echo "  deps           - Install dependencies"
 	@echo "  fmt            - Format code"
 	@echo "  lint           - Lint code"
+	@echo "  clean          - Clean build artifacts"
+	@echo "  dev-setup      - Setup development environment"
+	@echo ""
+	@echo "🔍 Quality & Security:"
 	@echo "  benchmark      - Run benchmark tests"
 	@echo "  security       - Check for vulnerabilities"
 	@echo "  ci             - Run full CI pipeline"
-	@echo "  dev-setup      - Setup development environment"
+	@echo ""
+	@echo "❓ Help:"
 	@echo "  help           - Show this help message" 
