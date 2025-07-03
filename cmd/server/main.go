@@ -1,16 +1,15 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/aungmyozaw92/go-api-setup/internal/config"
 	"github.com/aungmyozaw92/go-api-setup/internal/handler"
 	"github.com/aungmyozaw92/go-api-setup/internal/repository"
 	"github.com/aungmyozaw92/go-api-setup/internal/routes"
 	"github.com/aungmyozaw92/go-api-setup/internal/usecase"
+	"github.com/aungmyozaw92/go-api-setup/internal/worker"
 	"github.com/aungmyozaw92/go-api-setup/pkg/database"
 )
 
@@ -33,8 +32,19 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 
-	// Start background user count monitoring
-	go startUserCountMonitoring(userRepo)
+	// APPROACH A: Simple Worker (current - good for small apps)
+	userMonitor := worker.NewUserMonitor(userRepo)
+	go userMonitor.StartUserCountMonitoring()
+
+	// APPROACH B: Manager Pattern (better for scalable apps)
+	// Uncomment below and comment above to use manager pattern:
+	/*
+	workerManager := worker.SetupDefaultWorkers(userRepo)
+	workerManager.StartAll()
+	
+	// Optional: Graceful shutdown handling
+	// defer workerManager.StopAll()
+	*/
 
 	// Initialize use cases
 	userUsecase := usecase.NewUserUsecase(userRepo, config.JWT.SecretKey)
@@ -83,27 +93,4 @@ func logServerInfo(port string) {
 	log.Printf("")
 	log.Printf("📖 Documentation: https://github.com/aungmyozaw92/go-api-setup")
 	log.Printf("🎯 Ready to accept requests!")
-}
-
-// startUserCountMonitoring runs a background goroutine that logs user count every 10 seconds
-func startUserCountMonitoring(userRepo repository.UserRepository) {
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-	
-	log.Println("📊 Starting user count monitoring (every 10 seconds)")
-	
-	for {
-		select {
-		case <-ticker.C:
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			count, err := userRepo.Count(ctx)
-			cancel()
-			
-			if err != nil {
-				log.Printf("❌ Error getting user count: %v", err)
-			} else {
-				log.Printf("👥 Current user count: %d", count)
-			}
-		}
-	}
 } 
