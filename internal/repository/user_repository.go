@@ -16,6 +16,7 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uint) error
 	GetAll(ctx context.Context, limit, offset int) ([]*domain.User, error)
+	Count(ctx context.Context) (int64, error)
 }
 
 // userRepository implements UserRepository interface
@@ -97,4 +98,14 @@ func (r *userRepository) GetAll(ctx context.Context, limit, offset int) ([]*doma
 		return nil, err
 	}
 	return users, nil
+}
+
+// Count returns the total number of users in the database
+func (r *userRepository) Count(ctx context.Context) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&domain.User{}).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 } 

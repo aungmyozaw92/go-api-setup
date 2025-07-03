@@ -55,4 +55,10 @@ func (m *MockUserRepository) GetAll(ctx context.Context, limit, offset int) ([]*
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*domain.User), args.Error(1)
+}
+
+// Count mocks the Count method
+func (m *MockUserRepository) Count(ctx context.Context) (int64, error) {
+	args := m.Called(ctx)
+	return args.Get(0).(int64), args.Error(1)
 } 
